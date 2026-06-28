@@ -100,6 +100,60 @@ git status --short -uall
 
 Ensure the output does not include external repository files, `workspace/.local/`, local `local.paths.yaml`, or `workspace.local.yaml`.
 
+## 新电脑或新项目初始化 / New Machine Or New Project Initialization
+
+### 中文
+
+新电脑 clone 本仓库后，先安装依赖：
+
+```bash
+npm install
+```
+
+如果需要使用 T-MAX 代码仓和 `shared-skills` 背景，必须先创建本机路径配置：
+
+```bash
+cp workspace/projects/t-max/.loop/local.paths.yaml.example workspace/projects/t-max/.loop/local.paths.yaml
+```
+
+然后编辑 `workspace/projects/t-max/.loop/local.paths.yaml`，把 `shared-skills` 和各 T-MAX 仓库路径改成这台电脑上的真实绝对路径。
+
+编辑完成后运行：
+
+```bash
+npm run mount:tmax
+```
+
+这个命令会在 ignored 的 `workspace/.local/t-max/mounts/` 下生成软链接。没有这一步，agent 仍可读取工程配置，但无法通过统一挂载路径访问本机 T-MAX 仓库和 `shared-skills`。
+
+如果接入新的项目组，也要沿用同样模式：提交项目级 `project.yaml`、`SKILL.md`、`local.paths.yaml.example` 和挂载脚本；不要提交本机 `local.paths.yaml`、`.local/` 软链接或外部代码仓内容。
+
+### English
+
+After cloning this repository on a new machine, install dependencies first:
+
+```bash
+npm install
+```
+
+If T-MAX repositories and the `shared-skills` background are needed, create the local path configuration first:
+
+```bash
+cp workspace/projects/t-max/.loop/local.paths.yaml.example workspace/projects/t-max/.loop/local.paths.yaml
+```
+
+Then edit `workspace/projects/t-max/.loop/local.paths.yaml` and replace the `shared-skills` and T-MAX repository paths with real absolute paths on that machine.
+
+After editing, run:
+
+```bash
+npm run mount:tmax
+```
+
+This command generates symlinks under the ignored `workspace/.local/t-max/mounts/` directory. Without this step, agents can still read the engineering configuration, but they cannot access local T-MAX repositories or `shared-skills` through the unified mount paths.
+
+When adding a new project group, use the same pattern: commit the project-level `project.yaml`, `SKILL.md`, `local.paths.yaml.example`, and mount script; do not commit local `local.paths.yaml`, `.local/` symlinks, or external repository contents.
+
 ## Memory 与 Obsidian / Memory And Obsidian
 
 ### 中文
