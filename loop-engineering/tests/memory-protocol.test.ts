@@ -37,6 +37,23 @@ test('memory path resolution supports absolute vaults and Chinese path segments'
   assert.throws(() => resolveSafeWritePath(paths.learningRoot, path.join(tempRoot, 'outside.md')), /outside/);
 });
 
+test('memory path resolution supports nested learning roots', async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), 'memory-protocol-nested-'));
+  const vaultRoot = path.join(tempRoot, '知识库');
+
+  const paths = resolveMemoryProtocolPaths({
+    workspaceRoot: path.join(tempRoot, 'workspace'),
+    vaultRoot,
+    learningRootName: '88-学习/xiaobai',
+    projectId: 'demo',
+    loopId: 'morning-triage'
+  });
+
+  assert.equal(paths.learningRoot, path.join(vaultRoot, '88-学习', 'xiaobai'));
+  assert.equal(paths.globalIndexRoot, path.join(vaultRoot, '88-学习', 'xiaobai', '00-记忆索引'));
+  assert.equal(paths.projectRoot, path.join(vaultRoot, '88-学习', 'xiaobai', '10-项目记忆', 'demo'));
+});
+
 test('frontmatter parser tolerates missing and malformed frontmatter and normalizes tags', () => {
   const missing = parseFrontmatter('# Title\n\nBody');
   assert.deepEqual(missing.data, {});
@@ -127,6 +144,19 @@ test('templates parse and include controlled frontmatter and sections', () => {
   assert(caseTemplate);
   assert.match(caseTemplate.content, /## Trigger/);
   assert.match(caseTemplate.content, /## Reuse Hint/);
+});
+
+test('templates follow nested learning roots', () => {
+  const templates = createMemoryTemplates({
+    projectId: 'demo',
+    loopId: 'morning-triage',
+    date: '2026-06-28',
+    learningRootName: '88-学习/xiaobai'
+  });
+
+  assert(templates.every((template) => template.path.startsWith('88-学习/xiaobai/')));
+  assert(templates.some((template) => template.path === '88-学习/xiaobai/00-记忆索引/projects.md'));
+  assert(templates.some((template) => template.path === '88-学习/xiaobai/10-项目记忆/demo/index.md'));
 });
 
 test('obsidian links are stable for vault relative markdown paths', () => {

@@ -184,6 +184,36 @@ test('memory lifecycle indexes, searches, builds context, captures, promotes, va
   assert.match(await readFile(report.reportPath, 'utf8'), /Memory Report/);
 });
 
+test('memory cli infers nested learning root from local memory root', async () => {
+  const { workspaceRoot, vaultRoot } = await createTempWorkspace();
+  await writeFile(
+    path.join(workspaceRoot, 'workspace.local.yaml'),
+    `memoryRoot: ${vaultRoot}/88-学习/xiaobai/10-项目记忆/demo\n`,
+    'utf8'
+  );
+
+  const written = await runLoop([
+    'memory',
+    'init',
+    '--workspace',
+    workspaceRoot,
+    '--project',
+    'demo',
+    '--loop',
+    'morning-triage',
+    '--write',
+    '--json'
+  ]);
+  assert.equal(written.ok, true);
+  assert.equal(await pathExists(path.join(vaultRoot, '88-学习', 'xiaobai', '10-项目记忆', 'demo', 'index.md')), true);
+
+  const index = await runLoop(['memory', 'index', '--workspace', workspaceRoot, '--project', 'demo', '--write', '--json']);
+  assert.equal(index.ok, true);
+  assert.equal(index.summary.indexPath, path.join(vaultRoot, '88-学习', 'xiaobai', '00-记忆索引', 'memory-index.json'));
+  assert.equal(await pathExists(path.join(vaultRoot, '88-学习', 'xiaobai', '00-记忆索引', 'memory-index.json')), true);
+  assert.equal(await pathExists(path.join(vaultRoot, '88-学习', '00-记忆索引', 'memory-index.json')), false);
+});
+
 test('memory search reports missing index instead of silently scanning', async () => {
   const { workspaceRoot, vaultRoot } = await createTempWorkspace();
   await runLoop(['memory', 'init', '--workspace', workspaceRoot, '--vault', vaultRoot, '--project', 'demo', '--write', '--json']);

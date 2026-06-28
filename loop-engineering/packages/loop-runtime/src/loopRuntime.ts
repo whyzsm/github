@@ -7,7 +7,7 @@ import { EvaluatorRuntime } from '../../evaluator-runtime/src/evaluatorRuntime';
 import { HarnessRuntime } from '../../harness-runtime/src/harnessRuntime';
 import { HumanGate } from '../../human-gate/src/humanGate';
 import { MemoryStore } from '../../memory-store/src/memoryStore';
-import { resolveMemoryRoot } from '../../shared/src/memoryRoot';
+import { MemoryRootConfig, resolveMemoryRootConfig } from '../../shared/src/memoryRoot';
 import { Scheduler } from '../../scheduler/src/scheduler';
 import { readYamlFile } from '../../shared/src/fs';
 import { LoopSpec, RuntimePlan, WorkflowPlan } from '../../shared/src/types';
@@ -28,7 +28,8 @@ export class LoopRuntime {
   async dryRun(options: RuntimeOptions): Promise<RuntimePlan> {
     const workspaceRoot = path.resolve(options.workspaceRoot);
     const loop = await readYamlFile<LoopSpec>(options.loopPath);
-    const memoryRoot = await resolveMemoryRoot(workspaceRoot);
+    const memoryConfig = await resolveMemoryRootConfig(workspaceRoot);
+    const memoryRoot = memoryConfig.memoryRoot;
 
     const scheduler = new Scheduler(loop);
     const budget = new BudgetGuard(loop.budget).check();
@@ -66,6 +67,7 @@ export class LoopRuntime {
     const memoryContext = await buildMemoryContextMetadata({
       workspaceRoot,
       memoryRoot,
+      memoryConfig,
       loop,
       maxCharacters: context.maxCharacters
     });
@@ -101,25 +103,29 @@ export class LoopRuntime {
 async function buildMemoryContextMetadata(input: {
   workspaceRoot: string;
   memoryRoot: string;
+  memoryConfig: MemoryRootConfig;
   loop: LoopSpec;
   maxCharacters: number;
 }): Promise<RuntimePlan['memoryContext']> {
+  const projectId = inferProjectId(input.memoryRoot) ?? input.loop.handoff.project;
   const protocol = resolveMemoryProtocolPaths({
     workspaceRoot: input.workspaceRoot,
-    vaultRoot: inferVaultRoot(input.memoryRoot),
-    projectId: inferProjectId(input.memoryRoot) ?? input.loop.handoff.project,
+    vaultRoot: input.memoryConfig.memoryVaultRoot ?? inferVaultRoot(input.memoryRoot),
+    learningRootName: input.memoryConfig.memoryLearningRootName,
+    projectId,
     loopId: input.loop.metadata.id
   });
   const index = await buildMemoryIndex({
     workspaceRoot: input.workspaceRoot,
-    vaultRoot: protocol.vaultRoot
+    vaultRoot: protocol.vaultRoot,
+    learningRootName: relativeLearningRoot(protocol)
   });
   if (!(await pathExists(protocol.indexPath))) {
     await writeMemoryIndexAtomic(protocol.indexPath, index);
   }
   const bundle = await loadMemoryContext({
     index,
-    projectId: inferProjectId(input.memoryRoot) ?? input.loop.handoff.project,
+    projectId,
     loopId: input.loop.metadata.id,
     query: input.loop.metadata.name,
     maxCharacters: input.maxCharacters
@@ -140,6 +146,10 @@ async function buildMemoryContextMetadata(input: {
     })),
     warnings: bundle.warnings
   };
+}
+
+function relativeLearningRoot(paths: ReturnType<typeof resolveMemoryProtocolPaths>): string {
+  return path.relative(paths.vaultRoot, paths.learningRoot).replaceAll(path.sep, '/');
 }
 
 function inferVaultRoot(memoryRoot: string): string {

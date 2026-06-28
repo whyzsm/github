@@ -4,13 +4,15 @@
 
 这个目录是 loop 运行的默认 memory root。
 
-每台电脑也可以通过 `workspace/workspace.local.yaml` 把 memory 重定向到其他位置。推荐指向 Obsidian 中的项目独立目录：
+每台电脑也可以通过 `workspace/workspace.local.yaml` 把 memory 重定向到其他位置。推荐指向 Obsidian 中的项目独立目录，并显式声明 vault 根与学习根：
 
 ```yaml
-memoryRoot: /absolute/path/to/ObsidianVault/88-学习/10-项目记忆/xbaiProjectCode
+memoryRoot: /absolute/path/to/ObsidianVault/88-学习/xiaobai/10-项目记忆/xbaiProjectCode
+memoryVaultRoot: /absolute/path/to/ObsidianVault
+memoryLearningRootName: 88-学习/xiaobai
 ```
 
-`workspace.local.yaml` 已被 git 忽略。这样工程仓保持干净，同时不同终端或不同电脑可以指向同一个同步的 Obsidian vault 项目目录。
+`workspace.local.yaml` 已被 git 忽略。这样工程仓保持干净，同时不同终端或不同电脑可以指向同一个同步的 Obsidian vault 项目目录。`memoryLearningRootName` 同时决定 `00-记忆索引` 和 `10-项目记忆` 的共同父级。
 
 ## 当前结构
 
@@ -26,7 +28,7 @@ memoryRoot: /absolute/path/to/ObsidianVault/88-学习/10-项目记忆/xbaiProjec
 推荐 Obsidian 布局：
 
 ```text
-[vault]/88-学习/
+[vault]/88-学习/xiaobai/
   00-记忆索引/
     memory-index.json
     projects.md
@@ -71,13 +73,15 @@ npm run loop -- memory context --loop morning-triage --json
 
 This directory is the default memory root for loop runs.
 
-Memory can also be redirected per computer with `workspace/workspace.local.yaml`. Prefer an isolated project directory inside Obsidian:
+Memory can also be redirected per computer with `workspace/workspace.local.yaml`. Prefer an isolated project directory inside Obsidian, and declare the vault root and learning root explicitly:
 
 ```yaml
-memoryRoot: /absolute/path/to/ObsidianVault/88-学习/10-项目记忆/xbaiProjectCode
+memoryRoot: /absolute/path/to/ObsidianVault/88-学习/xiaobai/10-项目记忆/xbaiProjectCode
+memoryVaultRoot: /absolute/path/to/ObsidianVault
+memoryLearningRootName: 88-学习/xiaobai
 ```
 
-`workspace.local.yaml` is ignored by git. This keeps the shared engineering repo clean while allowing each terminal or computer to point at the same synced Obsidian vault directory.
+`workspace.local.yaml` is ignored by git. This keeps the shared engineering repo clean while allowing each terminal or computer to point at the same synced Obsidian vault directory. `memoryLearningRootName` controls the shared parent of both `00-记忆索引` and `10-项目记忆`.
 
 ## Current Layout
 
@@ -97,15 +101,29 @@ Keep JSONL files as machine-readable logs. Obsidian can display them, but manual
 Recommended vault layout:
 
 ```text
-[vault]/88-学习/
+[vault]/88-学习/xiaobai/
   00-记忆索引/
     memory-index.json
+    projects.md
+    cases.md
+    patterns.md
+    tags.md
   10-项目记忆/
     xbaiProjectCode/
       index.md
       project-profile.md
       active-context.md
-      loops/<loop-id>/
+      decisions.md
+      inbox.md
+      loops/
+        morning-triage/
+          state.md
+          inbox.md
+          decisions.md
+          runs.jsonl
+          findings.jsonl
+          metrics.jsonl
       cases/
       patterns/
+      reports/
 ```

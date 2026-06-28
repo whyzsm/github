@@ -2,23 +2,24 @@ import { MemoryTemplate, MemoryTemplateOptions } from './types';
 
 export function createMemoryTemplates(options: MemoryTemplateOptions): MemoryTemplate[] {
   const loopId = options.loopId ?? 'default-loop';
-  const projectRoot = `88-学习/10-项目记忆/${options.projectId}`;
+  const learningRoot = options.learningRootName ?? '88-学习';
+  const projectRoot = `${learningRoot}/10-项目记忆/${options.projectId}`;
 
   return [
     {
-      path: '88-学习/00-记忆索引/projects.md',
+      path: `${learningRoot}/00-记忆索引/projects.md`,
       content: frontmatter('项目记忆索引', 'memory-index', ['status/seed', 'type/memory-index']) + '# 项目记忆索引\n\n'
     },
     {
-      path: '88-学习/00-记忆索引/cases.md',
+      path: `${learningRoot}/00-记忆索引/cases.md`,
       content: frontmatter('跨项目 Case 索引', 'case-index', ['status/seed', 'type/case-index']) + '# 跨项目 Case 索引\n\n'
     },
     {
-      path: '88-学习/00-记忆索引/patterns.md',
+      path: `${learningRoot}/00-记忆索引/patterns.md`,
       content: frontmatter('跨项目 Pattern 索引', 'pattern-index', ['status/seed', 'type/pattern-index']) + '# 跨项目 Pattern 索引\n\n'
     },
     {
-      path: '88-学习/00-记忆索引/tags.md',
+      path: `${learningRoot}/00-记忆索引/tags.md`,
       content: frontmatter('记忆标签规范', 'tag-taxonomy', ['status/seed', 'type/tag-taxonomy']) + '# 记忆标签规范\n\n'
     },
     {

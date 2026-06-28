@@ -12,7 +12,7 @@ import { loadMemoryContext } from '../packages/memory-context/src';
 import { doctorMemory, validateMemory } from '../packages/memory-doctor/src';
 import { planCaseWrite, writeCase, writePattern } from '../packages/memory-capture/src';
 import { findLoopSpec, formatJson, pathExists, readText, readYamlFile } from '../packages/shared/src/fs';
-import { resolveMemoryRoot } from '../packages/shared/src/memoryRoot';
+import { resolveMemoryRootConfig } from '../packages/shared/src/memoryRoot';
 import { LoopSpec } from '../packages/shared/src/types';
 
 interface MemoryCliOptions {
@@ -82,12 +82,14 @@ async function executeMemoryCommand(input: MemoryCliOptions & { parsed: ParsedMe
 }
 
 async function resolveCliMemoryPaths(workspaceRoot: string, args: ParsedMemoryArgs): Promise<MemoryPaths> {
-  const memoryRoot = await resolveMemoryRoot(workspaceRoot);
-  const vaultRoot = args.vault ? path.resolve(args.vault) : inferVaultRoot(memoryRoot);
+  const memoryConfig = await resolveMemoryRootConfig(workspaceRoot);
+  const memoryRoot = memoryConfig.memoryRoot;
+  const vaultRoot = args.vault ? path.resolve(args.vault) : memoryConfig.memoryVaultRoot ?? inferVaultRoot(memoryRoot);
   const project = args.project ?? inferProjectId(memoryRoot) ?? 'default-project';
   return resolveMemoryProtocolPaths({
     workspaceRoot,
     vaultRoot,
+    learningRootName: memoryConfig.memoryLearningRootName,
     projectId: project,
     loopId: args.loop
   });
@@ -109,7 +111,8 @@ async function handleInit(command: string, paths: MemoryPaths, args: ParsedMemor
   const templates = createMemoryTemplates({
     projectId: path.basename(paths.projectRoot),
     loopId: args.loop,
-    date: new Date().toISOString().slice(0, 10)
+    date: new Date().toISOString().slice(0, 10),
+    learningRootName: relativeLearningRoot(paths)
   });
   const planned = [];
   for (const template of templates) {
@@ -129,7 +132,12 @@ async function handleInit(command: string, paths: MemoryPaths, args: ParsedMemor
 }
 
 async function handleIndex(command: string, paths: MemoryPaths, args: ParsedMemoryArgs, workspaceRoot: string): Promise<MemoryCommandResult> {
-  const index = await buildMemoryIndex({ workspaceRoot, vaultRoot: paths.vaultRoot, projectId: args.project });
+  const index = await buildMemoryIndex({
+    workspaceRoot,
+    vaultRoot: paths.vaultRoot,
+    learningRootName: relativeLearningRoot(paths),
+    projectId: args.project
+  });
   const summary = {
     indexPath: paths.indexPath,
     projects: index.projects.length,
@@ -217,7 +225,11 @@ async function handleCapture(command: string, paths: MemoryPaths, args: ParsedMe
   if (!args.write) return { ok: true, command, errors: [], warnings: [], preview: true, planned: plan };
 
   const written = await writeCase(plan);
-  const index = await buildMemoryIndex({ workspaceRoot, vaultRoot: paths.vaultRoot });
+  const index = await buildMemoryIndex({
+    workspaceRoot,
+    vaultRoot: paths.vaultRoot,
+    learningRootName: relativeLearningRoot(paths)
+  });
   await writeMemoryIndexAtomic(paths.indexPath, index);
   return { ok: true, command, errors: [], warnings: [], preview: false, written };
 }
@@ -241,7 +253,11 @@ async function handlePromote(command: string, paths: MemoryPaths, args: ParsedMe
     date: new Date().toISOString().slice(0, 10),
     sourceCases: [targetCase]
   });
-  const refreshed = await buildMemoryIndex({ workspaceRoot, vaultRoot: paths.vaultRoot });
+  const refreshed = await buildMemoryIndex({
+    workspaceRoot,
+    vaultRoot: paths.vaultRoot,
+    learningRootName: relativeLearningRoot(paths)
+  });
   await writeMemoryIndexAtomic(paths.indexPath, refreshed);
   return { ok: true, command, errors: [], warnings: [], preview: false, patternPath };
 }
@@ -259,9 +275,18 @@ async function handleReport(command: string, paths: MemoryPaths, args: ParsedMem
 
 async function ensureIndex(paths: MemoryPaths, workspaceRoot: string, args: ParsedMemoryArgs) {
   if (await pathExists(paths.indexPath)) return readMemoryIndex(paths.indexPath);
-  const index = await buildMemoryIndex({ workspaceRoot, vaultRoot: paths.vaultRoot, projectId: args.project });
+  const index = await buildMemoryIndex({
+    workspaceRoot,
+    vaultRoot: paths.vaultRoot,
+    learningRootName: relativeLearningRoot(paths),
+    projectId: args.project
+  });
   await writeMemoryIndexAtomic(paths.indexPath, index);
   return index;
+}
+
+function relativeLearningRoot(paths: MemoryPaths): string {
+  return path.relative(paths.vaultRoot, paths.learningRoot).replaceAll(path.sep, '/');
 }
 
 async function inferDefaultLoop(workspaceRoot: string): Promise<string | undefined> {

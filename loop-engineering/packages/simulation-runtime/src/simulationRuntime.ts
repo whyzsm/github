@@ -11,7 +11,7 @@ import {
   SimulationStage
 } from '../../shared/src/types';
 import { formatJson, writeText } from '../../shared/src/fs';
-import { resolveMemoryPath, resolveMemoryRoot } from '../../shared/src/memoryRoot';
+import { MemoryRootConfig, resolveMemoryPath, resolveMemoryRootConfig } from '../../shared/src/memoryRoot';
 import { planCaseWrite, writeCase } from '../../memory-capture/src';
 import { buildMemoryIndex, writeMemoryIndexAtomic } from '../../memory-indexer/src';
 import { resolveMemoryProtocolPaths } from '../../memory-protocol/src';
@@ -32,7 +32,8 @@ export class SimulationRuntime {
     const now = options.now ?? new Date();
     const runId = buildRunId(now);
     const plan = await new LoopRuntime().dryRun({ workspaceRoot, loopPath: options.loopPath, now });
-    const memoryRoot = await resolveMemoryRoot(workspaceRoot);
+    const memoryConfig = await resolveMemoryRootConfig(workspaceRoot);
+    const memoryRoot = memoryConfig.memoryRoot;
     const artifacts = artifactPaths(repoRoot, workspaceRoot, memoryRoot, plan.loopId, runId, now);
     const stages = buildStages(plan, artifacts);
     const sourceUser = await resolveSourceUser(repoRoot);
@@ -46,6 +47,7 @@ export class SimulationRuntime {
     const obsidianCase = await writeObsidianSimulationCase({
       workspaceRoot,
       memoryRoot,
+      memoryConfig,
       now,
       plan,
       sourceUser
@@ -98,13 +100,15 @@ export class SimulationRuntime {
 async function writeObsidianSimulationCase(input: {
   workspaceRoot: string;
   memoryRoot: string;
+  memoryConfig: MemoryRootConfig;
   now: Date;
   plan: RuntimePlan;
   sourceUser: string;
 }): Promise<string> {
   const protocol = resolveMemoryProtocolPaths({
     workspaceRoot: input.workspaceRoot,
-    vaultRoot: inferVaultRoot(input.memoryRoot),
+    vaultRoot: input.memoryConfig.memoryVaultRoot ?? inferVaultRoot(input.memoryRoot),
+    learningRootName: input.memoryConfig.memoryLearningRootName,
     projectId: inferProjectId(input.memoryRoot) ?? input.plan.handoff[0]?.project ?? 'default-project',
     loopId: input.plan.loopId
   });
@@ -120,10 +124,15 @@ async function writeObsidianSimulationCase(input: {
   const written = await writeCase(casePlan);
   const index = await buildMemoryIndex({
     workspaceRoot: input.workspaceRoot,
-    vaultRoot: protocol.vaultRoot
+    vaultRoot: protocol.vaultRoot,
+    learningRootName: relativeLearningRoot(protocol)
   });
   await writeMemoryIndexAtomic(protocol.indexPath, index);
   return written.path;
+}
+
+function relativeLearningRoot(paths: ReturnType<typeof resolveMemoryProtocolPaths>): string {
+  return path.relative(paths.vaultRoot, paths.learningRoot).replaceAll(path.sep, '/');
 }
 
 function renderObsidianCaseBody(now: Date, plan: RuntimePlan, sourceUser: string): string {

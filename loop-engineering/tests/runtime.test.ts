@@ -280,3 +280,42 @@ test('memory root can be redirected outside the workspace', async () => {
   assert.equal(plan.context.stateFile, path.join(externalLoopMemory, 'state.md'));
   assert.equal(plan.persistence.runLog, path.join(externalLoopMemory, 'runs.jsonl'));
 });
+
+test('dry-run memory context follows nested Obsidian learning root', async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), 'loop-memory-nested-root-'));
+  const tempWorkspace = path.join(tempRoot, 'workspace');
+  const vaultRoot = path.join(tempRoot, 'obsidian-vault');
+  const externalMemoryRoot = path.join(vaultRoot, '88-学习', 'xiaobai', '10-项目记忆', 'xbaiProjectCode');
+  const externalLoopMemory = path.join(externalMemoryRoot, 'loops', 'morning-triage');
+
+  await execFileAsync('cp', ['-R', path.join(repoRoot, 'loop-engineering'), path.join(tempRoot, 'loop-engineering')]);
+  await execFileAsync('cp', ['-R', workspaceRoot, tempWorkspace]);
+  await mkdir(externalLoopMemory, { recursive: true });
+  await writeFile(path.join(externalLoopMemory, 'state.md'), '# Nested State\n', 'utf8');
+  await writeFile(path.join(externalLoopMemory, 'inbox.md'), '# Nested Inbox\n', 'utf8');
+  await writeFile(path.join(externalLoopMemory, 'runs.jsonl'), '', 'utf8');
+  await writeFile(
+    path.join(externalMemoryRoot, 'index.md'),
+    '# xbaiProjectCode 项目记忆\n\nNested learning root.\n',
+    'utf8'
+  );
+  await writeFile(
+    path.join(tempWorkspace, 'workspace.local.yaml'),
+    `memoryRoot: ${externalMemoryRoot}\n`,
+    'utf8'
+  );
+
+  const loopPath = await findLoopSpec(tempWorkspace, 'morning-triage');
+  const plan = await new LoopRuntime().dryRun({
+    workspaceRoot: tempWorkspace,
+    loopPath,
+    now: new Date('2026-06-28T01:02:03.000Z')
+  });
+
+  assert.equal(
+    plan.memoryContext?.indexPath,
+    path.join(vaultRoot, '88-学习', 'xiaobai', '00-记忆索引', 'memory-index.json')
+  );
+  assert.equal(await pathExists(path.join(vaultRoot, '88-学习', 'xiaobai', '00-记忆索引', 'memory-index.json')), true);
+  assert.equal(await pathExists(path.join(vaultRoot, '88-学习', '00-记忆索引', 'memory-index.json')), false);
+});

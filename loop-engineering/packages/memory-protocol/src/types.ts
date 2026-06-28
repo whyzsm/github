@@ -48,6 +48,7 @@ export interface MemoryTemplateOptions {
   projectId: string;
   loopId?: string;
   date: string;
+  learningRootName?: string;
 }
 
 export interface MemoryTemplate {

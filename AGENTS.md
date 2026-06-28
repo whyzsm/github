@@ -159,28 +159,36 @@ When adding a new project group, use the same pattern: commit the project-level 
 ### 中文
 
 1. 默认 memory root 是 `workspace/memory`。
-2. 每台电脑可用 ignored 的 `workspace/workspace.local.yaml` 改写 memory root。
-3. 推荐把跨终端共享 memory 指向 Obsidian vault 下的同步目录，例如：
+2. 每台电脑可用 ignored 的 `workspace/workspace.local.yaml` 改写 memory root；新电脑或新工程初始化时必须先复制 `workspace/workspace.local.yaml.example` 为 `workspace/workspace.local.yaml`，再改成本机真实路径。
+3. 推荐把跨终端共享 memory 指向 Obsidian vault 下的同步目录，并显式声明 vault 根与学习根。例如当前 `xiaobai` 布局：
 
 ```yaml
-memoryRoot: /absolute/path/to/ObsidianVault/88-学习/Loop Engineering Memory
+memoryRoot: /absolute/path/to/ObsidianVault/88-学习/xiaobai/10-项目记忆/xbaiProjectCode
+memoryVaultRoot: /absolute/path/to/ObsidianVault
+memoryLearningRootName: 88-学习/xiaobai
 ```
 
-4. `state.md`、`inbox.md`、`decisions.md` 适合在 Obsidian 中人工维护。
-5. `runs.jsonl`、`findings.jsonl`、`metrics.jsonl` 是机器追加日志；可以在 Obsidian 查看，但不建议手工编辑。
+4. `memoryRoot` 指向当前工程的项目记忆目录，`memoryVaultRoot` 指向 Obsidian vault 根目录，`memoryLearningRootName` 决定 `00-记忆索引` 与 `10-项目记忆` 的共同父级；例如上面的配置会使用 `88-学习/xiaobai/00-记忆索引`。
+5. 如果 `memoryRoot` 已经位于 `88-学习/.../10-项目记忆/<projectId>` 下，系统会尽量自动推断 `memoryVaultRoot` 和 `memoryLearningRootName`；但跨电脑迁移时仍优先显式写出三个字段，避免路径歧义。
+6. `state.md`、`inbox.md`、`decisions.md` 适合在 Obsidian 中人工维护。
+7. `runs.jsonl`、`findings.jsonl`、`metrics.jsonl` 是机器追加日志；可以在 Obsidian 查看，但不建议手工编辑。
 
 ### English
 
 1. The default memory root is `workspace/memory`.
-2. Each computer can override the memory root with ignored `workspace/workspace.local.yaml`.
-3. For cross-terminal memory sharing, point memory to a synced Obsidian vault directory, for example:
+2. Each computer can override the memory root with ignored `workspace/workspace.local.yaml`. When initializing a new computer or new project checkout, copy `workspace/workspace.local.yaml.example` to `workspace/workspace.local.yaml` first, then replace the paths with real local paths.
+3. For cross-terminal memory sharing, point memory to a synced Obsidian vault directory and declare both the vault root and learning root explicitly. For the current `xiaobai` layout:
 
 ```yaml
-memoryRoot: /absolute/path/to/ObsidianVault/88-学习/Loop Engineering Memory
+memoryRoot: /absolute/path/to/ObsidianVault/88-学习/xiaobai/10-项目记忆/xbaiProjectCode
+memoryVaultRoot: /absolute/path/to/ObsidianVault
+memoryLearningRootName: 88-学习/xiaobai
 ```
 
-4. `state.md`, `inbox.md`, and `decisions.md` are suitable for manual maintenance in Obsidian.
-5. `runs.jsonl`, `findings.jsonl`, and `metrics.jsonl` are append-only machine logs. They can be viewed in Obsidian, but manual edits are discouraged.
+4. `memoryRoot` points to this project's memory directory, `memoryVaultRoot` points to the Obsidian vault root, and `memoryLearningRootName` controls the shared parent of `00-记忆索引` and `10-项目记忆`; the example above uses `88-学习/xiaobai/00-记忆索引`.
+5. If `memoryRoot` already lives under `88-学习/.../10-项目记忆/<projectId>`, the system will try to infer `memoryVaultRoot` and `memoryLearningRootName`; still prefer writing all three fields explicitly when moving across computers to avoid path ambiguity.
+6. `state.md`, `inbox.md`, and `decisions.md` are suitable for manual maintenance in Obsidian.
+7. `runs.jsonl`, `findings.jsonl`, and `metrics.jsonl` are append-only machine logs. They can be viewed in Obsidian, but manual edits are discouraged.
 
 ## 开发与验证命令 / Development And Verification Commands
 

@@ -5,5 +5,10 @@
 #   memoryRoot: workspace/memory
 #
 # Recommended Obsidian setup:
-#   memoryRoot: /absolute/path/to/ObsidianVault/88-学习/Loop Engineering Memory
+#   memoryRoot: /absolute/path/to/ObsidianVault/88-学习/xiaobai/10-项目记忆/xbaiProjectCode
+#
+# Optional explicit Obsidian roots. These are useful when the learning root
+# contains extra path segments such as 88-学习/xiaobai.
+#   memoryVaultRoot: /absolute/path/to/ObsidianVault
+#   memoryLearningRootName: 88-学习/xiaobai
 memoryRoot: memory

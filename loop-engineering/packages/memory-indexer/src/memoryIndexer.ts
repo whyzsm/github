@@ -18,6 +18,7 @@ import { classifyNote } from './noteClassifier';
 export interface BuildMemoryIndexOptions {
   workspaceRoot: string;
   vaultRoot: string;
+  learningRootName?: string;
   projectId?: string;
   now?: Date;
 }
@@ -26,6 +27,7 @@ export async function buildMemoryIndex(options: BuildMemoryIndexOptions): Promis
   const paths = resolveMemoryProtocolPaths({
     workspaceRoot: options.workspaceRoot,
     vaultRoot: options.vaultRoot,
+    learningRootName: options.learningRootName,
     projectId: options.projectId ?? '__all__'
   });
   const warnings: MemoryWarning[] = [];
