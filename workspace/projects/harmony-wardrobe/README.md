@@ -16,7 +16,7 @@
 这些软链接不是代码副本。通过挂载路径修改代码，实际修改的是原始本地 git 仓库：
 
 ```text
-/Users/seminzhu/Documents/zsm/ai/aicode/harmonyWardrobe
+/absolute/path/to/harmonyWardrobe
 ```
 
 ## 每台电脑的配置
@@ -43,7 +43,7 @@ This directory persists the standalone `harmonyWardrobe` project context: a nati
 The symlinks are intentionally not code copies. Changes made through the mount are changes in the original local git repository:
 
 ```text
-/Users/seminzhu/Documents/zsm/ai/aicode/harmonyWardrobe
+/absolute/path/to/harmonyWardrobe
 ```
 
 ## Per-Machine Setup
