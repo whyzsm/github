@@ -131,6 +131,20 @@ test('memory lifecycle indexes, searches, builds context, captures, promotes, va
   const foundCase = await runLoop(['memory', 'search', 'Auth', '--workspace', workspaceRoot, '--vault', vaultRoot, '--project', 'demo', '--json']);
   assert(foundCase.matches.some((match: { title: string }) => match.title === 'Auth Triage Lesson'));
 
+  const noMatches = await runLoop([
+    'memory',
+    'search',
+    '完全不存在的检索词',
+    '--workspace',
+    workspaceRoot,
+    '--vault',
+    vaultRoot,
+    '--project',
+    'demo',
+    '--json'
+  ]);
+  assert.deepEqual(noMatches.matches, []);
+
   const promotePreview = await runLoop([
     'memory',
     'promote',
