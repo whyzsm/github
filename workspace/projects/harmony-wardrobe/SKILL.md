@@ -15,6 +15,17 @@
 - 远端仓库：`git@codeup.aliyun.com:62ecbcd881ddd27ad912a7b9/harmonyWardrobe.git`。
 - 本机路径来自 `.loop/local.paths.yaml`，该文件不提交。
 
+## 项目级 Codex 技能
+
+`harmonyWardrobe` 任务默认叠加以下 Codex 技能。技能包安装在全局 Codex skills 中，小白工程仓只记录项目级触发关系，不复制技能源码。
+
+- `harmony-os-ask`：用于 HarmonyOS、ArkTS、ArkUI、DevEco、hvigor、路由、生命周期、状态管理、构建或调试的问答、解释和诊断。
+- `harmony-os-act`：用于在 `harmonyWardrobe` 仓内实现、修复、重构或解释鸿蒙原生代码改动。
+- `generate-ui-code`：用于根据需求、截图、草图或设计说明生成或修改 ArkUI 页面、组件、资源和路由。
+- `service-widget`：用于创建、修改、解释或调试鸿蒙服务卡片、万能卡片、`form_config.json`、卡片资源和卡片能力。
+
+当任务同时命中多个技能时，先读取本项目 `SKILL.md` 和挂载背景，再按任务意图选择最窄技能组合；例如页面实现优先使用 `generate-ui-code` 并叠加 `harmony-os-act`，概念问答优先使用 `harmony-os-ask`。
+
 ## 规则
 
 1. 修改 `harmonyWardrobe` 前，先确认挂载存在；缺失时运行 `npm run mount:harmony-wardrobe`。
@@ -39,6 +50,17 @@ Persist the standalone `harmonyWardrobe` project context in this loop workspace 
 - Project context mount: `../../.local/harmony-wardrobe/mounts/background/harmonyWardrobe`.
 - Remote repository: `git@codeup.aliyun.com:62ecbcd881ddd27ad912a7b9/harmonyWardrobe.git`.
 - Local paths are resolved from `.loop/local.paths.yaml`, which is intentionally not committed.
+
+## Project-Level Codex Skills
+
+`harmonyWardrobe` tasks should layer in the following Codex skills by default. The skill packages are installed in global Codex skills; this engineering repository records only the project-level trigger relationship and does not copy skill source code.
+
+- `harmony-os-ask`: Use for Q&A, explanation, and diagnosis about HarmonyOS, ArkTS, ArkUI, DevEco, hvigor, routing, lifecycle, state management, builds, or debugging.
+- `harmony-os-act`: Use for implementing, fixing, refactoring, or explaining native HarmonyOS code changes in the `harmonyWardrobe` repository.
+- `generate-ui-code`: Use for generating or modifying ArkUI pages, components, resources, and routes from requirements, screenshots, sketches, or design specs.
+- `service-widget`: Use for creating, modifying, explaining, or debugging HarmonyOS service widgets, meta-service cards, `form_config.json`, card resources, and card abilities.
+
+When a task matches multiple skills, read this project `SKILL.md` and the mounted background first, then choose the narrowest skill combination for the task intent. For example, page implementation should prefer `generate-ui-code` layered with `harmony-os-act`, while conceptual Q&A should prefer `harmony-os-ask`.
 
 ## Rules
 
