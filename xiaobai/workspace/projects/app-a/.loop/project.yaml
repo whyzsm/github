@@ -1,6 +1,0 @@
-kind: Project
-id: app-a
-name: App A
-root: .
-defaultBranch: main
-skill: SKILL.md
