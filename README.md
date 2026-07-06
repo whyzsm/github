@@ -7,5 +7,6 @@ Featured repositories:
 
 - [whyzsm/tiny-agents](https://github.com/whyzsm/tiny-agents)
 - [whyzsm/harmonyWardrobe](https://github.com/whyzsm/harmonyWardrobe)
+- [whyzsm/xiaobai](https://github.com/whyzsm/xiaobai)
 
 The site is a static GitHub Pages page.
